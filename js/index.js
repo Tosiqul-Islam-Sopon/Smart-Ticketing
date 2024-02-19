@@ -2,6 +2,7 @@ const seats = document.querySelectorAll('.seat');
 const selectedSeats = [];
 let totalPrice;
 let phoneNumber = '';
+let discountPrice = 0;
 
 updateTable();
 updateNextButtonState();
@@ -16,6 +17,7 @@ function handleSeatSelection() {
     else {
         document.getElementById('error-message').classList.add('hidden');
         seat.classList.toggle('bg-selected');
+        seat.classList.toggle('text-white');
         const seatName = seat.textContent;
         const seatClass = 'Business';
         const seatPrice = 550;
@@ -50,7 +52,12 @@ function handleSeatSelection() {
         else {
             document.getElementById('coupon-text').setAttribute('disabled', 'disabled');
             document.getElementById('coupon-btn').setAttribute('disabled', 'disabled');
+            document.getElementById('coupon-text').classList.remove('hidden');
+            document.getElementById('coupon-btn').classList.remove('hidden');
+            document.getElementById('coupon-text').value = '';
+            discountPrice = 0;
         }
+
         updateTable();
         updateNextButtonState();
     }
@@ -58,7 +65,7 @@ function handleSeatSelection() {
 
 function updateTable() {
     const tableBody = document.querySelector('.table tbody');
-    tableBody.innerHTML = ''; 
+    tableBody.innerHTML = '';
     selectedSeats.forEach(seat => {
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -79,6 +86,16 @@ function updateTable() {
     tableBody.appendChild(totalRow);
 
     let grandTotal = totalPrice;
+    if (discountPrice > 0) {
+        grandTotal -= discountPrice;
+        const discountRow = document.createElement('tr');
+        discountRow.innerHTML = `
+            <td>Discount</td>
+            <td></td>
+            <td>- BDT <span>${discountPrice}</span></td>
+        `;
+        tableBody.appendChild(discountRow);
+    }
     document.getElementById('grand-total').textContent = grandTotal;
 
 }
@@ -87,21 +104,24 @@ function grandOffer() {
     let grandTotal = totalPrice;
     const couponText = document.getElementById('coupon-text').value;
     if (couponText === 'NEW15') {
-        grandTotal -= grandTotal * 0.15;
+        discountPrice = totalPrice * 0.15;
+        grandTotal -= discountPrice;
         document.getElementById('error-coupon').classList.add('hidden');
         document.getElementById('coupon-text').classList.add('hidden');
         document.getElementById('coupon-btn').classList.add('hidden');
     }
     else if (couponText === 'Couple 20') {
-        grandTotal -= grandTotal * 0.2;
+        discountPrice = totalPrice * 0.2;
+        grandTotal -= discountPrice;
         document.getElementById('error-coupon').classList.add('hidden');
         document.getElementById('coupon-text').classList.add('hidden');
         document.getElementById('coupon-btn').classList.add('hidden');
     }
-    else{
+    else {
         document.getElementById('error-coupon').classList.remove('hidden');
+        discountPrice = 0;
     }
-    document.getElementById('grand-total').textContent = grandTotal;
+    updateTable();
 
 }
 
@@ -116,11 +136,11 @@ function updateNextButtonState() {
     }
 }
 
-for(const seat of seats){
-    seat.addEventListener('click',handleSeatSelection);
+for (const seat of seats) {
+    seat.addEventListener('click', handleSeatSelection);
 }
 
-document.getElementById('phone-number').addEventListener('input', function() {
+document.getElementById('phone-number').addEventListener('input', function () {
     phoneNumber = this.value.trim();
     updateNextButtonState();
 });
