@@ -1,7 +1,10 @@
 const seats = document.querySelectorAll('.seat');
 const selectedSeats = [];
 let totalPrice;
+let phoneNumber = '';
+
 updateTable();
+updateNextButtonState();
 
 function handleSeatSelection() {
     const seat = this;
@@ -14,7 +17,7 @@ function handleSeatSelection() {
         document.getElementById('error-message').classList.add('hidden');
         seat.classList.toggle('bg-selected');
         const seatName = seat.textContent;
-        const seatClass = 'Business'; // Assuming it's Business class for all selected seats
+        const seatClass = 'Business';
         const seatPrice = 550;
 
         let availableSeat = parseInt(document.getElementById('available-seats').textContent);
@@ -49,14 +52,13 @@ function handleSeatSelection() {
             document.getElementById('coupon-btn').setAttribute('disabled', 'disabled');
         }
         updateTable();
+        updateNextButtonState();
     }
 }
 
 function updateTable() {
     const tableBody = document.querySelector('.table tbody');
-    tableBody.innerHTML = ''; // Clear the table body
-
-    // Add selected seats' information to the table
+    tableBody.innerHTML = ''; 
     selectedSeats.forEach(seat => {
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -67,7 +69,6 @@ function updateTable() {
         tableBody.appendChild(row);
     });
 
-    // Calculate and display the total price
     totalPrice = selectedSeats.reduce((total, seat) => total + seat.price, 0);
     const totalRow = document.createElement('tr');
     totalRow.innerHTML = `
@@ -81,8 +82,6 @@ function updateTable() {
     document.getElementById('grand-total').textContent = grandTotal;
 
 }
-
-
 
 function grandOffer() {
     let grandTotal = totalPrice;
@@ -106,8 +105,22 @@ function grandOffer() {
 
 }
 
-seats.forEach(seat => {
-    // console.log(seat);
-    // seat.nextSibling()
-    seat.addEventListener('click', handleSeatSelection);
-})
+function updateNextButtonState() {
+    const nextButton = document.getElementById('next-btn');
+    const phoneNumberInput = document.getElementById('phone-number');
+
+    if (selectedSeats.length > 0 && phoneNumberInput.value.trim() !== '') {
+        nextButton.removeAttribute('disabled');
+    } else {
+        nextButton.setAttribute('disabled', 'disabled');
+    }
+}
+
+for(const seat of seats){
+    seat.addEventListener('click',handleSeatSelection);
+}
+
+document.getElementById('phone-number').addEventListener('input', function() {
+    phoneNumber = this.value.trim();
+    updateNextButtonState();
+});
